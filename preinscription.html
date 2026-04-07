@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Préinscription – Études Turquie</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(145deg, #0b2b3b 0%, #1c5a7a 100%);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: rgba(255,255,255,0.97);
+            border-radius: 48px;
+            padding: 40px 32px;
+            max-width: 560px;
+            width: 100%;
+            box-shadow: 0 25px 45px -12px rgba(0,0,0,0.35);
+            transition: 0.2s;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #0b2b3b, #2c7a5e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 8px;
+        }
+        .sub {
+            color: #4b5563;
+            margin-bottom: 30px;
+            border-left: 4px solid #2c7a5e;
+            padding-left: 15px;
+            font-weight: 500;
+        }
+        .input-group {
+            margin-bottom: 24px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            color: #1e2b3c;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 34px;
+            font-size: 1rem;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        input:focus {
+            outline: none;
+            border-color: #2c7a5e;
+            box-shadow: 0 0 0 3px rgba(44,122,94,0.2);
+        }
+        .radio-group {
+            background: #f0f9f4;
+            padding: 20px;
+            border-radius: 32px;
+            margin: 25px 0 20px;
+        }
+        .radio-group p {
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #1e4b3c;
+            font-size: 0.9rem;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .radio-option input {
+            width: 20px;
+            height: 20px;
+            margin: 0;
+            accent-color: #2c7a5e;
+        }
+        .radio-option label {
+            margin: 0;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        button {
+            background: #1e4b6e;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #0f3b55;
+            transform: scale(1.01);
+            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.2);
+        }
+        .message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 40px;
+            text-align: center;
+            display: none;
+        }
+        .success {
+            background: #c6f6d5;
+            color: #22543d;
+            display: block;
+        }
+        .error {
+            background: #fed7d7;
+            color: #742a2a;
+            display: block;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.7);
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>🇹🇷 Turquie</h1>
+    <div class="sub">Études & accompagnement personnalisé</div>
+
+    <form id="leadForm">
+        <div class="input-group">
+            <label>Nom complet</label>
+            <input type="text" id="nom" placeholder="Jean KOUAMÉ" required>
+        </div>
+        <div class="input-group">
+            <label>Email</label>
+            <input type="email" id="email" placeholder="jean@exemple.com" required>
+        </div>
+        <div class="input-group">
+            <label>Téléphone (WhatsApp)</label>
+            <input type="tel" id="telephone" placeholder="+221 77 123 45 67" required>
+        </div>
+
+        <div class="radio-group">
+            <p>💰 Quel budget êtes-vous prêt à investir pour l'accompagnement ?</p>
+            <div class="radio-option">
+                <input type="radio" name="montant" value="Moins de 160 000" id="moins" required>
+                <label for="moins">Moins de 160 000 FCFA</label>
+            </div>
+            <div class="radio-option">
+                <input type="radio" name="montant" value="160 000 - 320 000" id="moyen">
+                <label for="moyen">Entre 160 000 et 320 000 FCFA</label>
+            </div>
+            <div class="radio-option">
+                <input type="radio" name="montant" value="Plus de 320 000" id="plus">
+                <label for="plus">Plus de 320 000 FCFA</label>
+            </div>
+        </div>
+
+        <button type="submit">🚀 Postuler maintenant</button>
+        <div id="message" class="message"></div>
+    </form>
+</div>
+<footer>Après validation, nous vous demanderons passeport + CNI. Paiement uniquement après accord.</footer>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/VOTRE_ID/exec"; // À remplacer
+
+    const form = document.getElementById('leadForm');
+    const msgDiv = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const selectedRadio = document.querySelector('input[name="montant"]:checked');
+        if (!selectedRadio) {
+            showMessage("Veuillez sélectionner votre budget d'accompagnement.", "error");
+            return;
+        }
+        const lead = {
+            nom: document.getElementById('nom').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            telephone: document.getElementById('telephone').value.trim(),
+            montant: selectedRadio.value
+        };
+        if (!lead.nom || !lead.email || !lead.telephone) {
+            showMessage("Veuillez remplir tous les champs.", "error");
+            return;
+        }
+        showMessage("Envoi en cours...", "info");
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(lead)
+            });
+            showMessage("✅ Préinscription reçue ! Vous serez contacté sous 48h.", "success");
+            form.reset();
+        } catch(err) {
+            showMessage("❌ Erreur technique. Contactez-nous directement au +221 XX XXX XX", "error");
+        }
+    });
+
+    function showMessage(text, type) {
+        msgDiv.innerHTML = `<div class="${type}">${text}</div>`;
+        if (type === 'success') setTimeout(() => msgDiv.innerHTML = '', 6000);
+    }
+</script>
+</body>
+</html>

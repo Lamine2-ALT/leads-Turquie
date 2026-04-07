@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard – Leads Turquie</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f1f5f9;
+            font-family: 'Inter', system-ui, sans-serif;
+            padding: 30px 20px;
+        }
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            align-items: center;
+        }
+        h1 {
+            font-size: 1.8rem;
+            color: #0b2b3b;
+        }
+        .stats {
+            display: flex;
+            gap: 15px;
+        }
+        .stat-card {
+            background: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .filters {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 60px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .filters select, .filters button {
+            padding: 8px 18px;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            font-family: inherit;
+            background: white;
+            cursor: pointer;
+        }
+        .filters button {
+            background: #1e4b6e;
+            color: white;
+            border: none;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.03);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        th {
+            text-align: left;
+            padding: 16px 12px;
+            background: #f8fafc;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #edf2f7;
+        }
+        .badge-high {
+            background: #fef3c7;
+            color: #b45309;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 30px;
+            display: inline-block;
+        }
+        .badge-mid {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 12px;
+            border-radius: 30px;
+        }
+        .badge-low {
+            background: #e2e3e5;
+            color: #2d3e50;
+            padding: 4px 12px;
+            border-radius: 30px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-export {
+            background: #2c7a5e;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📋 Leads – Études Turquie</h1>
+        <div class="stats">
+            <div class="stat-card" id="totalCount">Total: 0</div>
+            <div class="stat-card" id="highCount">💰 Plus de 320k: 0</div>
+        </div>
+    </div>
+
+    <div class="filters">
+        <span>🔍 Filtrer par budget :</span>
+        <select id="budgetFilter">
+            <option value="all">Tous</option>
+            <option value="Moins de 160 000">Moins de 160 000</option>
+            <option value="160 000 - 320 000">160 000 - 320 000</option>
+            <option value="Plus de 320 000">Plus de 320 000</option>
+        </select>
+        <button id="applyFilter">Appliquer</button>
+        <button id="refreshBtn">🔄 Rafraîchir</button>
+        <button id="exportBtn" class="btn-export">📎 Exporter CSV</button>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="leadsTable">
+            <thead>
+                <tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Budget</th><th>Statut</th><th>Date</th></tr>
+            </thead>
+            <tbody id="leadsBody">
+                <tr><td colspan="6" class="loading">Chargement...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/VOTRE_ID/exec"; // Même URL que le formulaire
+    let allLeads = [];
+
+    async function loadLeads() {
+        const tbody = document.getElementById('leadsBody');
+        tbody.innerHTML = '<tr><td colspan="6" class="loading">⏳ Synchronisation...</td></tr>';
+        try {
+            const res = await fetch(SCRIPT_URL);
+            const data = await res.json();
+            allLeads = data;
+            applyFilterAndRender();
+        } catch(e) {
+            tbody.innerHTML = '<tr><td colspan="6" class="loading">❌ Erreur de chargement. Vérifiez l’URL.</td></tr>';
+        }
+    }
+
+    function applyFilterAndRender() {
+        const filter = document.getElementById('budgetFilter').value;
+        let filtered = allLeads;
+        if (filter !== 'all') {
+            filtered = allLeads.filter(lead => lead.Montant === filter);
+        }
+        renderTable(filtered);
+        updateStats(filtered);
+    }
+
+    function renderTable(leads) {
+        const tbody = document.getElementById('leadsBody');
+        if (!leads.length) {
+            tbody.innerHTML = '<tr><td colspan="6">Aucun lead correspondant</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        leads.forEach(lead => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerText = lead.Nom || '';
+            row.insertCell(1).innerText = lead.Email || '';
+            row.insertCell(2).innerText = lead.Téléphone || '-';
+            const montant = lead.Montant || '';
+            let badgeClass = 'badge-low';
+            if (montant === 'Plus de 320 000') badgeClass = 'badge-high';
+            else if (montant === '160 000 - 320 000') badgeClass = 'badge-mid';
+            row.insertCell(3).innerHTML = `<span class="${badgeClass}">${montant}</span>`;
+            row.insertCell(4).innerText = lead.Statut || 'Nouveau';
+            row.insertCell(5).innerText = lead.Horodatage ? new Date(lead.Horodatage).toLocaleString() : '-';
+        });
+    }
+
+    function updateStats(leads) {
+        document.getElementById('totalCount').innerText = `Total: ${leads.length}`;
+        const high = leads.filter(l => l.Montant === 'Plus de 320 000').length;
+        document.getElementById('highCount').innerHTML = `💰 Plus de 320k: ${high}`;
+    }
+
+    function exportCSV() {
+        if (!allLeads.length) return alert('Aucune donnée à exporter');
+        const headers = ['Nom', 'Email', 'Téléphone', 'Montant', 'Statut', 'Horodatage'];
+        const rows = allLeads.map(l => [
+            l.Nom, l.Email, l.Téléphone, l.Montant, l.Statut, l.Horodatage
+        ].map(cell => `"${String(cell || '').replace(/"/g, '""')}"`));
+        const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+        const blob = new Blob([csv], {type: 'text/csv'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `leads_turquie_${new Date().toISOString().slice(0,19)}.csv`;
+        a.click();
+    }
+
+    document.getElementById('applyFilter').addEventListener('click', applyFilterAndRender);
+    document.getElementById('refreshBtn').addEventListener('click', loadLeads);
+    document.getElementById('exportBtn').addEventListener('click', exportCSV);
+    loadLeads();
+</script>
+</body>
+</html>
